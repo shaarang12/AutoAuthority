@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html  ng-app="myApp">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+      *{
+    padding: 0;
+    margin: 0;
+}
+body{
+    background-color: #61122f;
+}
+.navbar{
+    background-color: #f6b319;
+    height:60px;
+}
+.navbar > img{
+    border-radius: 50px;
+    height: 50px;
+    width:55px;
+    padding-left: 10px;
+    padding-top:5px;
+}
+.navbar span{
+    position:relative;
+    bottom:30%;
+    left: 3%;
+    padding-left:10px;
+    color: #61122f;
+    font-weight: 900;
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 24px;;
+}
+.navbar a{
+    position: relative;
+    left:50%;
+    bottom:30%;
+    text-decoration: none;
+    font-weight: 900;
+    font-size: 20px;
+}
+
+.navbar a:visited, a:link{
+    color: #61122f;
+}
+.navbar a:hover,a:active{
+    color: red;
+}
+.menu h1{
+    color: #FFd700;
+    text-align: center;
+    padding-top:30px;
+    font-weight: 900;
+    font-size: 34px;
+    font-family: sans-serif;
+    font-style: italic;
+    padding-bottom: 30px;
+}
+.menu table{
+    padding-top: 30px;
+    margin-left: auto;
+    margin-right: auto;
+    width:80%;
+    border: 2px solid #fff;
+    border-collapse: collapse;
+    text-align: center;
+}
+.menu th{
+    border: 2px solid #fff;
+    color:#f6b319;
+    font-size: 24px;
+    font-weight: bold;
+    font-style: italic;
+    padding: 20px;
+}
+
+.menu table td{
+    border: 2px solid #fff;
+    color:aliceblue;
+    font-size: 24px;
+    font-weight: bold;
+    font-style: italic;
+    padding-top: 30px;
+    padding-bottom: 30px;
+}
+
+.menu table td a
+{
+    color:#f6b319;
+    text-decoration: none;
+    font-size: 50px;
+padding-left: 250px;
+}
+</style>
+
+<title>Verification</title>
+</head>
+<body>
+ <header>
+ <div class="navbar">
+    <img src="5528439.jpg">
+    <span>Auto Authority</span>
+    <a href="index1.html" title="Home Page">Home</a>   
+    &nbsp;
+    <a href="AboutUs.html" title="About Us Page"> About us</a>
+    &nbsp;
+    <a href="Book.html">Book with Us</a>
+    </div>
+ </header>
+ <section>
+    
+    <div class="menu">
+        <h1 >Details Of the Information of the User</h1>
+        <div class="search">
+        </div>
+
+        <div ng-controller='namesCtrl'>
+        <table>
+            <tr>
+         <th>User-Id</th>
+        <th>License</th>
+        <th>Aadhar</th>
+        <th>PAN</th>
+        <th>Voter</th>
+        <th>Doc File</th>
+        </tr>
+        <tr>
+            <th>{{userid}}</th>
+            <th>{{license}}</th>
+            <th>{{aadhar}}</th>
+            <th>{{pan}}</th>
+            <th>{{voter}}</th>
+            <th><a href='docverify'>Verify Document</a></th>
+        </tr>
+            <td colspan="3">
+                <a href="/infoaccept">Accept</a>
+            </td>
+            <td colspan="3">
+                <a href="/inforeject">Reject</a>
+            </td>
+         </tr>
+        </table>
+        </div>
+    </div>
+ </section>
+</body>
+</html>
