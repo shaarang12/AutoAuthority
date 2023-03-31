@@ -133,7 +133,7 @@ app.get('/view_fines', async(req, res)=>{
 var data1, data3
 var noOfDays
 var displayMarquee = false
-var expired = false
+var expired
 
 //variables for register page 1
 var f_name, l_name, dob, age, gender, formattedDate
@@ -331,11 +331,10 @@ app.post('/login', async(req, res)=>{
                                 const diffInDays = Math.round(diffInTime / oneDay);
                                 return diffInDays;
                             }
-
                             noOfDays = getNumberOfDays(currentDate, formattedDate)
                             if(noOfDays <= 30 && noOfDays >= 1){
                                 displayMarquee = true
-                                expired = false
+                                // expired = false
                             }
                             else if(noOfDays < 1){
                                 displayMarquee = true
