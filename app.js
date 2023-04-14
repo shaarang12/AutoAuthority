@@ -851,8 +851,15 @@ app.get('/deny_transfer', (req, res)=>{
     pool.query('DELETE FROM transfer_temp WHERE from_license = ? AND to_license = ? AND reg_no = ?', [from_l, to_l, reg_no], (err)=>{
       if(err)
         console.log("Error Removing Vehicle Transfer Info from Temp Table")
-      else
-        res.redirect('/rto_dashboard')
+      else{
+        pool.query('DELETE FROM ownership_transfer LIMIT 1', (err)=>{
+          if(err)
+            console.log("Error Removing Transfer Details from Ownership Table")
+          else{
+            res.redirect('/rto_dashboard')
+          }
+        })
+      }  
     })
   }
   else
