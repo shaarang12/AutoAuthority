@@ -8,6 +8,7 @@ import bodyParser from 'body-parser'
 import multer from 'multer';
 import fs from 'fs';
 import sharp from 'sharp';
+import { u } from 'tar'
 //creating an express application
 const app = express()
 
@@ -48,6 +49,7 @@ const storage = multer.diskStorage({
 });
   
 const upload11 = multer({ storage: storage });
+
 //setting default engine to handlebar
 app.set('view engine', 'hbs')
 
@@ -84,6 +86,7 @@ app.get('/rto_login', (req, res)=>{
 
 //route for rto officer dashboard
 app.get('/rto_index', (req, res)=>{
+  if(req.session.loggedin)
     res.render('rto_index', {msg: true})
 })
 
@@ -133,7 +136,7 @@ app.get('/view_fines', async(req, res)=>{
 var data1, data3
 var noOfDays
 var displayMarquee = false
-var expired
+var expired = false
 
 //variables for register page 1
 var f_name, l_name, dob, age, gender, formattedDate
@@ -158,9 +161,8 @@ app.post('/register1', async(req, res)=>{
     const ageDiffs = Date.now() - dobDate.getTime()
     const ageDate = new Date(ageDiffs)
     age = Math.abs(ageDate.getUTCFullYear() - 1970)
-    console.log(age)
     if(age < 18)
-        res.render('register', {msg: true})
+        res.render('register1', {msg: true})
     else    
         res.render('register2')
 })
@@ -178,31 +180,74 @@ app.post('/register2', async(req, res)=>{
 })
 
 //variables for register page 3
-var user_id, password, c_password, hash
+var user_id, o_password, password, c_password, hash
 
 //route for third register page
 app.post('/register3', async(req, res)=>{
     user_id = req.body.userid
     password = req.body.password
     c_password = req.body.cpassword
-
     //password validation
     if(password === c_password){
-        hash = await bcrypt.hash(password, 12)
-        pool.query('INSERT INTO user_register (f_name, l_name, dob, age, gender, phone, email, address_p, address_s, user_id, user_pass) VALUES (?,?,?,?,?,?,?,?,?,?,?)', [f_name, l_name, dob, age, gender, phone, email, address_p, address_s, user_id, hash], (err)=>{
-            if(err)
-                console.log('Failed to Create User: ', err)
-            else{
-                console.log('User Created Successfully!')
-                res.redirect('/')
-            }
-        })
+        pool.query('SELECT * FROM user_register WHERE user_id = ?', [user_id], async(request, result)=>{
+          if(result.length == 0){
+            hash = await bcrypt.hash(password, 12)
+            pool.query('INSERT INTO user_register (f_name, l_name, dob, age, gender, phone, email, address_p, address_s, user_id, user_pass) VALUES (?,?,?,?,?,?,?,?,?,?,?)', [f_name, l_name, dob, age, gender, phone, email, address_p, address_s, user_id, hash], (err)=>{
+              console.log('User Created Successfully!')
+              res.redirect('/')
+            })
+          }
+          else
+            res.render('register3', {msg1: true}) 
+        })   
     }
     else{
         console.log('Passwords Do Not Match!')
-        res.render('register', {msg: true})
+        // res.render('register3', {msg: true})
         return false
     }
+})
+
+//route for change password form
+app.get('/edit_info', (req, res)=>{
+  if(req.session.loggedin)
+    res.render('edit_info')
+  else
+    res.redirect('/')
+})
+
+//route to update password
+app.post('/edit_info', async(req, res)=>{
+  if(req.session.loggedin){
+    o_password = req.body.opassword
+    password = req.body.password
+    c_password = req.body.cpassword
+    pool.query('SELECT user_pass FROM user_register WHERE user_id = ?', [req.session.user], async(request, result)=>{
+      const e_password = result[0].user_pass
+      const isMatch = await bcrypt.compare(o_password, e_password)
+        if(isMatch){
+          if(password === c_password){
+            hash = await bcrypt.hash(password, 12)
+            pool.query('UPDATE user_register SET user_pass = ? WHERE user_id = ?', [hash, req.session.user], (err)=>{
+              if(err)
+                console.log("Error Updating Password!")
+              else{
+                console.log("Password Changed!")
+                res.redirect('/logout')
+              }
+            })
+          }
+          else 
+            console.log("Passwords Don't Match!")
+        }
+        else{
+          console.log('Old Password is Incorrect!')
+          res.render('edit_info', {msg1: true})
+        }      
+    })
+  }
+  else
+    res.redirect('/')
 })
 
 //route for rto officer to impose fines on vehicle
@@ -225,7 +270,7 @@ app.post('/fine', async(req, res)=>{
                     console.log('Failed to Add Fine: ', err)
                 else{
                     console.log('Fine Added Successfully')
-                    res.redirect('rto_index')
+                    res.redirect('/rto_dashboard')
                 }
             })
             }
@@ -386,17 +431,22 @@ app.post('/login', async(req, res)=>{
 })
 
 //variable
-var count1;
+var count1,count2
 
 //route for rto dashboard
 app.get('/rto_dashboard', async(req, res) =>{
       if(req.session.loggedin){
         try{
-          const query="SELECT user_id from user_docs_temp ";
+          const query="SELECT user_id from user_docs_temp";
           pool.query(query,[],(req,result,err)=>{
             var data=JSON.parse(JSON.stringify(result));
             count1=data.length;
-          res.render("rto_index", {count:count1,fname:data3[0].f_name, lname:data3[0].l_name});
+            pool.query('SELECT from_license from transfer_temp', (req, result)=>{
+              var data = JSON.parse(JSON.stringify(result))
+              count2 = data.length
+              res.render("rto_index", {count:count1+count2,fname:data3[0].f_name, lname:data3[0].l_name})
+            })
+          
           });
         }
         catch(error){
@@ -452,7 +502,62 @@ app.get('/upload',(req,res)=>
     if(req.session.loggedin){
     res.render('user_credentials.hbs',{username:user_id})
     }
-});
+})
+
+//route to redirect to vehicle transfer form
+app.get('/transfer', (req, res)=>{
+  if(req.session.loggedin)
+    res.render('transfer')
+  else
+    res.redirect('/')
+})
+
+//route for vehicle ownership tansfer form submission
+app.post('/transfer', (req,res)=>{
+  if(req.session.loggedin){
+    const regno = req.body.regno
+    const license = req.body.license
+
+  const query1='SELECT user_id from user_vehicle where reg_plate=?';
+      pool.query(query1,[regno],async(err,result1)=>{
+        if(err)
+        console.log(err)
+        else
+        {
+          if(result1.length == 0)
+            res.render('transfer',{msg1:true})
+          else if(result1[0].user_id!=req.session.user)
+            res.render('transfer',{msg:true})
+          else if(result1[0].user_id==req.session.user)
+          {
+            pool.query('SELECT user_id from user_license where license = ?', [license], async(err, result)=>{
+              if(err)
+                console.log("Error Fetching User Details!")
+              else{
+                if(result.length == 0){
+                  res.render('transfer',{msg2:true})
+                  console.log('No User Found')
+                }
+                else{
+                  const user_id = result[0].user_id
+                  pool.query('INSERT INTO ownership_transfer VALUES (?, ?, ?)', [license, regno, req.session.user], (err)=>{
+                    if(err)
+                      console.log('Error Inserting Values')
+                    else{
+                      console.log('Request Submitted Successfully!')
+                      res.redirect('/dashboard')
+                    }
+                  })
+                }
+              }
+            })
+          }
+        }
+      })
+
+    
+  }
+})
 
 //variable for user doc verification
 var User_id,aadhar,voter,pan,license
@@ -514,13 +619,17 @@ app.get('/verifyinfo',(req,res)=>{
   if(req.session.loggedin){
     const query="SELECT * from user_docs_temp LIMIT 1"
     pool.query(query,(request,results,err)=>{
-      var data=JSON.parse(JSON.stringify(results))
-      useridverify=data[0].user_id
-      var license=data[0].license
-      var aadhaar=data[0].aadhaar
-      var pan=data[0].pan
-      var voter=data[0].voter
-      res.render('info_verify',{userid:useridverify,license:license,aadhar:aadhaar,pan:pan,voter:voter})
+      if(results.length == 0)
+        res.redirect('/rto_dashboard')
+      else{
+        var data=JSON.parse(JSON.stringify(results))
+        useridverify=data[0].user_id
+        var license=data[0].license
+        var aadhaar=data[0].aadhaar
+        var pan=data[0].pan
+        var voter=data[0].voter
+        res.render('info_verify',{userid:useridverify,license:license,aadhar:aadhaar,pan:pan,voter:voter})
+      }
     })
   } 
   else
@@ -567,7 +676,7 @@ app.get('/infoaccept',(req,res)=>{
         else
         
         res.redirect('/rto_dashboard')
-        const query2="DELETE  from user_docs_temp where user_id=?"
+        const query2="DELETE from user_docs_temp where user_id=?"
         pool.query(query2,[userid],(requests1,results1,err1)=>{
           if(err1)
           console.log(err1)
@@ -611,9 +720,149 @@ app.get('/inforeject',(req,res)=>{
     res.redirect('/')
 })
 
+var data, u_license, reg_no, user_id, f_name, l_name, company, model, color
+//route for vehicle owner to view list of ownership transfers
+app.get('/request',(req, res)=>{
+  if(req.session.loggedin){
+    pool.query('SELECT license from user_license where user_id = ?', [req.session.user], (request, result)=>{
+      u_license = result[0].license
+      pool.query('SELECT reg_no, user_id FROM ownership_transfer where license = ? LIMIT 1', [u_license], (request, result)=>{
+        if(result.length == 0)
+          res.redirect('/dashboard')
+        else{
+          data = JSON.parse(JSON.stringify(result))
+        reg_no = data[0].reg_no
+        user_id = data[0].user_id
+        pool.query('SELECT f_name, l_name from user_register where user_id = ?', [user_id], (request, result)=>{
+          data = JSON.parse(JSON.stringify(result))
+          f_name = data[0].f_name
+          l_name = data[0].l_name
+          pool.query('SELECT company, model, color from user_vehicle where reg_plate = ?', [reg_no], (request, result)=>{
+            data = JSON.parse(JSON.stringify(result))
+            company = data[0].company
+            model = data[0].model
+            color = data[0].color
+            res.render('pending_request',{fname:f_name,lname:l_name,regno:reg_no,company:company,color:color,model:model})
+          })
+        })
+        }
+      })
+    })
+  }
+  else
+    res.redirect('/')
+})
+
+//route for vehicle owner to accept ownership transfer
+app.get('/transferaccept', (req, res)=>{
+  if(req.session.loggedin){
+    pool.query('SELECT license FROM user_license WHERE user_id = ?', [user_id], (request, result)=>{
+      var license = result[0].license
+      pool.query('INSERT INTO transfer_temp VALUES (?,?,?)', [license, u_license, reg_no], (err)=>{
+        if(err)
+          console.log("Error Inserting Values")
+        else{
+          pool.query('DELETE FROM ownership_transfer where reg_no = ?', [reg_no], (err)=>{
+            res.redirect('/dashboard')
+          })
+        }
+      })
+    })
+  }
+  else
+    res.redirect('/')
+})
+
+//route for vehicle owner to reject ownership transfer
+app.get('/transferreject', (req, res)=>{
+  if(req.session.loggedin){
+    pool.query('DELETE FROM ownership_transfer where reg_no = ?', [reg_no], (err)=>{
+      res.redirect('/dashboard')
+    })
+  }
+  else
+    res.redirect('/')
+})
+
+//variables required for vehicle transfer
+var from_l, to_l, company, model, reg_no
+var f_fname, f_lname, t_fname, t_lname, u_id
+
+//route to fetch 1 record from transfer table
+app.get('/transfer_rto', (req, res)=>{
+  if(req.session.loggedin){
+    pool.query('SELECT * from transfer_temp LIMIT 1', (req, result)=>{
+      if(result.length == 0)
+        res.redirect('/rto_dashboard')
+      else{
+        var data=JSON.parse(JSON.stringify(result))
+        from_l = data[0].from_license
+        to_l = data[0].to_license
+        reg_no = data[0].reg_no
+        pool.query('SELECT f_name, l_name FROM user_register INNER JOIN user_license ON user_register.user_id = user_license.user_id WHERE license = ?', [from_l], (req, result)=>{
+          var data=JSON.parse(JSON.stringify(result))
+          f_fname = data[0].f_name
+          f_lname = data[0].l_name
+          pool.query('SELECT f_name, l_name FROM user_register INNER JOIN user_license ON user_register.user_id = user_license.user_id WHERE license = ?', [to_l], (req, result)=>{
+            var data=JSON.parse(JSON.stringify(result))
+            t_fname = data[0].f_name
+            t_lname = data[0].l_name
+            pool.query('SELECT company, model FROM user_vehicle WHERE reg_plate = ?', [reg_no], (req, result)=>{
+              var data=JSON.parse(JSON.stringify(result))
+              company = data[0].company
+              model = data[0].model
+              pool.query('SELECT user_id FROM user_license WHERE license = ?', [to_l], (req, result)=>{
+                u_id = result[0].user_id
+                res.render('transfer_rto_page', {f_fname:f_fname, f_lname: f_lname, t_fname: t_fname, t_lname: t_lname, regno: reg_no, company: company, model: model})
+              })
+            })
+          })
+        })
+      }
+    })
+  }
+  else
+    res.redirect('/')
+})
+
+//route for rto officer to approve vehicle transfer
+app.get('/approve_transfer', (req, res)=>{
+  if(req.session.loggedin){
+    pool.query('UPDATE user_vehicle SET license = ?, user_id = ? WHERE reg_plate = ?', [to_l, u_id, reg_no], (err)=>{
+      if(err)
+        console.log("Error Linking Vehicle to New Owner!")
+      else{
+        pool.query('DELETE FROM transfer_temp WHERE from_license = ? AND to_license = ? AND reg_no = ?', [from_l, to_l, reg_no], (err)=>{
+          if(err)
+            console.log("Error Removing Vehicle Transfer Info from Temp Table")
+          else
+            res.redirect('/rto_dashboard')
+        })
+      }
+    })
+  }
+  else
+    res.redirect('/')
+})
+
+//route for rto officer to deny vehicle transfer
+app.get('/deny_transfer', (req, res)=>{
+  if(req.session.loggedin){
+    pool.query('DELETE FROM transfer_temp WHERE from_license = ? AND to_license = ? AND reg_no = ?', [from_l, to_l, reg_no], (err)=>{
+      if(err)
+        console.log("Error Removing Vehicle Transfer Info from Temp Table")
+      else
+        res.redirect('/rto_dashboard')
+    })
+  }
+  else
+    res.redirect('/')
+})
+
 //route for vehicle owner to create fasttag or view balance
 app.get('/fast_tag', (req, res)=>{
 })
+
 
 //starting the server
 app.listen(3004, ()=>{
