@@ -487,7 +487,7 @@ app.get('/dashboard_no_license', async(req, res)=>{
         res.redirect('/')
 })
 
-//logout route for vehicle owner
+//logout route for both users
 app.get('/logout', (req, res)=>{
     req.session.destroy((err)=>{
         if(err)
