@@ -14,7 +14,7 @@
 #login .container #login-row #login-column #login-box {
   margin-top: 48px;
   max-width: 600px;
-  height: 500px;
+  height: 375px;
   border: 1px solid #9C9C9C;
   background-color: #EAEAEA;
 }
@@ -26,37 +26,40 @@ input[type=radio] {
 }
 #login .container #login-row #login-column #login-box #login-form #register-link {
   margin-top: -7px;
+  
 }
 </style>
 </head>
 <body>
     <div id="login">
-        <h3 class="text-center text-white pt-5">FINES</h3>
+        <h3 class="text-center text-white pt-5">Vehicle Ownership Transfer Form</h3>
         <div class="container">
             <div id="login-row" class="row justify-content-center align-items-center">
                 <div id="login-column" class="col-md-6">
                     <div id="login-box" class="col-md-12">
-                        <form id="login-form" class="form"  method="post" action="/fine">
-                            <h3 class="text-center text-info">Impose Fine</h3>
-                            <br>
+                        <form id="login-form" class="form"  method="post" action="/transfer">
+                            <h3 class="text-center text-info">Ownership Transfer</h3>
                             <div class="form-group">
-                                <label for="vehicle" class="text-info">Vehicle Registration Number</label><br>
+                                <label for="regno" class="text-info">Vehicle Registration Number</label><br>
                                 <input type="text" name="regno" id="regno" class="form-control" required autofocus>
                             </div>
                             <div class="form-group">
-                                <label for="fineid" class="text-info">Fine ID</label><br>
-                                <input type="number" name="fineid" id="fineid" class="form-control">
+                                <label for="license" class="text-info">New Owner License Number</label><br>
+                                <input type="text" name="license" id="license" class="form-control" required autofocus>
                             </div>
-                            <div class="form-group">
-                                <label for="doi" class="text-info">Payable By</label><br>
-                                <input type="date" name="doi" id="doi" class="form-control" required><br><br>
-                                    {{#if msg}}
-                                    <p style="color: red;font:100">*Fine ID Range is from 1 to 93 only!</p>      
-                                    {{/if}}
-                                    {{#if msg1}}
-                                    <p style="color: red;font:100">*Invalid Vehicle Registration Number</p>
-                                    {{/if}}  
-                                    <br>
+                           <div>
+                            {{#if msg}}
+                              <p style="color: red;font:100">*This Vehicle Does Not Belong To You!</p>
+                            {{/if}}
+                            {{#if msg1}}
+                              <p style="color: red;font:100">*Invalid Vehicle Registration Number!</p>
+                            {{/if}}
+                            {{#if msg2}}
+                              <p style="color: red;font:100">*Invalid License Number!</p>
+                            {{/if}}    
+                           </div>
+                                <h3></h3>
+                                <br>
                                 <button name="next" class="btn btn-info btn-md">NEXT</button>
                             </div>
                         </form>
@@ -66,3 +69,4 @@ input[type=radio] {
         </div>
     </div>
 </body>
+

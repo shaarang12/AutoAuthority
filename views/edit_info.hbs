@@ -27,7 +27,7 @@
 #login .container #login-row #login-column #login-box {
   margin-top: 48px;
   max-width: 600px;
-  height: 440px;
+  height: 425px;
   border: 1px solid #9C9C9C;
   background-color: #EAEAEA;
 }
@@ -42,19 +42,22 @@
 </head>
 <body>
     <div id="login">
-        <h3 class="text-center text-white pt-5">SignUp form</h3>
+        <h3 class="text-center text-white pt-5">Modify Login Info</h3>
         <div class="container">
             <div id="login-row" class="row justify-content-center align-items-center">
                 <div id="login-column" class="col-md-6">
                     <div id="login-box" class="col-md-12">
-                        <form id="login-form" class="form" action="/register3" method="post" onkeyup='check();'>
-                            <h3 class="text-center text-info">Sign Up</h3>
+                        <form id="login-form" class="form" action="/edit_info" method="post" onkeyup='check();'>
+                            <h3 class="text-center text-info">Update Password</h3>
                             <div class="form-group">
-                                <label for="username" class="text-info" >User-ID</label><br>
-                                <input type="text" name="userid" id="userid" class="form-control" maxlength="10" autofocus>
+                                <label for="opassword" class="text-info">Old Password</label><br>
+                                <input type="password" name="opassword" id="opassword" class="form-control" autofocus required>
                             </div>
+                            {{#if msg1}}
+                                  <p style="color: red;font:100">*Old Password is Incorrect!</p>
+                                {{/if}} 
                             <div class="form-group">
-                                <label for="password" class="text-info">Password</label><br>
+                                <label for="password" class="text-info">New Password</label><br>
                                 <input type="password" name="password" id="password" class="form-control" required>
                             </div>
                             <div class="form-group">
@@ -63,11 +66,6 @@
                                 <span id='message'></span>
                                 <br>
                             </div>
-                            <div>
-                            {{#if msg1}}
-                              <p style="color: red;font:100">*UserID Already Exists</p>
-                            {{/if}}   
-                           </div>
                             <input type="submit" name="next" class="btn btn-info btn-md" value="Submit">
                             </div>
                         </form>

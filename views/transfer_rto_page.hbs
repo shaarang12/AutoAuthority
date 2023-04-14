@@ -51,33 +51,29 @@
         <header class="masthead bg-primary text-white text-center">
             <div class="container d-flex align-items-center flex-column">
                 <div class="menu">
-        <h1 >Details Of the Information of the User</h1>
+        <h1 >Vehicle Ownership Transfer</h1>
         <div class="search">
         </div>
 
         <div ng-controller='namesCtrl'>
         <table>
             <tr>
-         <th>User-Id</th>
-        <th>License</th>
-        <th>Aadhaar</th>
-        <th>PAN</th>
-        <th>Voter</th>
-        <th>Doc File</th>
-        </tr>
+                <th>FROM OWNER</th>
+                <th>TO OWNER</th>
+                <th>Registration Number</th>
+                <th>Vehicle</th>
+            </tr>
         <tr>
-            <th>{{userid}}</th>
-            <th>{{license}}</th>
-            <th>{{aadhar}}</th>
-            <th>{{pan}}</th>
-            <th>{{voter}}</th>
-            <th><a id="color" href='docverify'>Verify Document</a></th>
+            <th>{{f_fname}} {{f_lname}}</th>
+            <th>{{t_fname}} {{t_lname}}</th>
+            <th>{{regno}}</th>
+            <th>{{company}} {{model}}</th>
         </tr>
             <td class="center-text" colspan="3">
-                <a id="color" href="/infoaccept">Accept</a>
+                <a id="color" href="/approve_transfer">Accept</a>
             </td>
             <td class="center-text" colspan="3">
-                <a id="color" href="/inforeject">Reject</a>
+                <a id="color" href="/deny_transfer">Reject</a>
             </td>
          </tr>
         </table>

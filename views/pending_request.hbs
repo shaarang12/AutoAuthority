@@ -41,7 +41,7 @@
                 </button>
                 <div class="collapse navbar-collapse" id="navbarResponsive">
                     <ul class="navbar-nav ms-auto">
-                        <li class="nav-item mx-0 mx-lg-1"><a class="nav-link py-3 px-0 px-lg-3 rounded" href="/rto_dashboard">Dashboard</a></li>
+                        <li class="nav-item mx-0 mx-lg-1"><a class="nav-link py-3 px-0 px-lg-3 rounded" href="/dashboard">Dashboard</a></li>
                         <li class="nav-item mx-0 mx-lg-1"><a class="nav-link py-3 px-0 px-lg-3 rounded" href="/logout" method="GET">Logout</a></li>
                     </ul>
                 </div>
@@ -51,33 +51,29 @@
         <header class="masthead bg-primary text-white text-center">
             <div class="container d-flex align-items-center flex-column">
                 <div class="menu">
-        <h1 >Details Of the Information of the User</h1>
+        <h1 >Details of the Vehicle to be Transferred</h1>
         <div class="search">
         </div>
 
         <div ng-controller='namesCtrl'>
         <table>
             <tr>
-         <th>User-Id</th>
-        <th>License</th>
-        <th>Aadhaar</th>
-        <th>PAN</th>
-        <th>Voter</th>
-        <th>Doc File</th>
-        </tr>
+                <th>Current Owner</th>
+                <th>Registration Number</th>
+                <th>Vehicle</th>
+                <th>Colour</th>
+            </tr>
         <tr>
-            <th>{{userid}}</th>
-            <th>{{license}}</th>
-            <th>{{aadhar}}</th>
-            <th>{{pan}}</th>
-            <th>{{voter}}</th>
-            <th><a id="color" href='docverify'>Verify Document</a></th>
+            <th>{{fname}} {{lname}}</th>
+            <th>{{regno}}</th>
+            <th>{{company}} {{model}}</th>
+            <th>{{color}}</th>
         </tr>
             <td class="center-text" colspan="3">
-                <a id="color" href="/infoaccept">Accept</a>
+                <a id="color" href="/transferaccept">Accept</a>
             </td>
             <td class="center-text" colspan="3">
-                <a id="color" href="/inforeject">Reject</a>
+                <a id="color" href="/transferreject">Reject</a>
             </td>
          </tr>
         </table>
