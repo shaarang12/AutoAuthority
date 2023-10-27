@@ -1,6 +1,9 @@
 # AutoAuthority - Road Transport Management System
 
 ![Dashboard Screenshot](/AA/dashboard.png)
+![Services Screenshot](/AA/services.png)
+![License Screenshot](/AA/license.png)
+![Ownership Transfer Screenshot](/AA/transfer.png)
 
 AutoAuthority is a Road Transport Management System designed to streamline and automate various processes related to vehicle ownership, fine management, and document verification. This project utilizes technologies like Node.js, Express, Handlebars, MySQL, and AWS RDS to provide a comprehensive solution for both vehicle owners and RTO (Regional Transport Office) officers.
 
